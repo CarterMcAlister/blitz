@@ -1,4 +1,5 @@
 import React, {ComponentPropsWithoutRef, useEffect} from "react"
+import {QueryClient} from "react-query"
 import {useAuthorizeIf} from "./auth/auth-client"
 import {publicDataStore} from "./auth/public-data-store"
 import {BlitzProvider} from "./blitz-provider"
@@ -54,7 +55,14 @@ export function withBlitzInnerWrapper(Page: BlitzPage) {
   return BlitzInnerRoot
 }
 
-export function withBlitzAppRoot(UserAppRoot: React.ComponentType<any>) {
+type BlitzAppConfig = {
+  app: React.ComponentType<any>
+  queryClient: QueryClient
+}
+
+export type WithBlitzAppRootProps = BlitzAppConfig | React.ComponentType<any>
+
+export function withBlitzAppRoot(UserAppRootProps: WithBlitzAppRootProps) {
   const BlitzOuterRoot = (props: AppProps) => {
     if (typeof window !== "undefined") {
       if (publicDataStore.getData().userId) {
@@ -74,6 +82,9 @@ export function withBlitzAppRoot(UserAppRoot: React.ComponentType<any>) {
         }
       }
     }
+    const UserAppRoot = (UserAppRootProps as BlitzAppConfig)?.app || UserAppRootProps
+    const queryClient = (UserAppRootProps as BlitzAppConfig)?.queryClient
+
     const component = React.useMemo(() => withBlitzInnerWrapper(props.Component), [props.Component])
 
     const noPageFlicker =
@@ -86,7 +97,7 @@ export function withBlitzAppRoot(UserAppRoot: React.ComponentType<any>) {
     }, [])
 
     return (
-      <BlitzProvider dehydratedState={props.pageProps.dehydratedState}>
+      <BlitzProvider dehydratedState={props.pageProps.dehydratedState} client={queryClient}>
         {noPageFlicker && <NoPageFlicker />}
         <UserAppRoot {...props} Component={component} />
       </BlitzProvider>

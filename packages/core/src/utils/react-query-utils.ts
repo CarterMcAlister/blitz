@@ -1,4 +1,4 @@
-import {QueryClient, QueryKey} from "react-query"
+import {DefaultOptions, QueryClient, QueryKey} from "react-query"
 import {serialize} from "superjson"
 import {getBlitzRuntimeData} from "../blitz-data"
 import {EnhancedResolverRpcClient, QueryFn, Resolver, ResolverType} from "../types"
@@ -9,7 +9,7 @@ type MutateOptions = {
   refetch?: boolean
 }
 
-export const initializeQueryClient = () => {
+export const initializeQueryClient = (options?: DefaultOptions) => {
   let suspenseEnabled = true
   if (!process.env.CLI_COMMAND_CONSOLE && !process.env.CLI_COMMAND_DB) {
     const data = getBlitzRuntimeData()
@@ -18,6 +18,7 @@ export const initializeQueryClient = () => {
 
   return new QueryClient({
     defaultOptions: {
+      ...options,
       queries: {
         suspense: !!suspenseEnabled,
         retry: (failureCount, error: any) => {
@@ -28,6 +29,7 @@ export const initializeQueryClient = () => {
 
           return false
         },
+        ...(options?.queries ?? {}),
       },
     },
   })

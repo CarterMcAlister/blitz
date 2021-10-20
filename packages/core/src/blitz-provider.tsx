@@ -4,7 +4,7 @@ import {Hydrate, HydrateOptions} from "react-query/hydration"
 import {queryClient} from "./utils/react-query-utils"
 
 export type BlitzProviderProps = {
-  client?: QueryClient
+  client?: QueryClient | undefined
   contextSharing?: boolean
   dehydratedState?: unknown
   hydrateOptions?: HydrateOptions
